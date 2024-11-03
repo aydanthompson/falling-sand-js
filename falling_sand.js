@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 
 const canvasWidth = canvas.width;
 const canvasHeight = canvas.height;
-const pixelSize = 10;
+const pixelSize = 8;
 
 const gridRows = Math.floor(canvasHeight / pixelSize);
 const gridCols = Math.floor(canvasWidth / pixelSize);
@@ -13,7 +13,7 @@ let newColor = [0, 75, 50];
 
 let isDragging = false;
 let mouseX, mouseY;
-const mouseRadius = 1;
+const mouseRadius = 3;
 
 let grid = new Array(gridRows);
 for (let i = 0; i < gridRows; i++) {
@@ -32,14 +32,18 @@ function isRowColInGrid(row, col) {
   return row >= 0 && row < gridRows && col >= 0 && col < gridCols ? true : false;
 }
 
+function isInCircle(row, col, gridRow, gridCol) {
+  return ((row - gridRow) ** 2 + (col - gridCol) ** 2 <= mouseRadius ** 2) ? true : false;
+}
+
 function updatePixelRange() {
   if (isXYOnCanvas(mouseX, mouseY)) {
     const gridRow = Math.floor(mouseY / pixelSize);
     const gridCol = Math.floor(mouseX / pixelSize);
 
-    for (let row = gridRow - mouseRadius; row < gridRow + mouseRadius; row++) {
-      for (let col = gridCol - mouseRadius; col < gridCol + mouseRadius; col++) {
-        if (isRowColInGrid(row, col)) {
+    for (let row = gridRow - mouseRadius; row <= gridRow + mouseRadius; row++) {
+      for (let col = gridCol - mouseRadius; col <= gridCol + mouseRadius; col++) {
+        if (isRowColInGrid(row, col) && isInCircle(row, col, gridRow, gridCol)) {
           updatePixel(row, col);
         }
       }
