@@ -36,6 +36,11 @@ function isInCircle(row, col, gridRow, gridCol) {
   return (row - gridRow) ** 2 + (col - gridCol) ** 2 <= mouseRadius ** 2 ? true : false;
 }
 
+/**
+ * Updates a range of pixels in the grid based on the current mouse position.
+ *
+ * @returns {void}
+ */
 function updatePixelRange() {
   if (isXYOnCanvas(mouseX, mouseY)) {
     const gridRow = Math.floor(mouseY / pixelSize);
@@ -51,6 +56,13 @@ function updatePixelRange() {
   }
 }
 
+/**
+ * Updates a specific pixel in the grid to a new color if it is currently blank.
+ *
+ * @param {number} row - The row index of the pixel to update.
+ * @param {number} col - The column index of the pixel to update.
+ * @returns {void}
+ */
 function updatePixel(row, col) {
   // Only update blank pixels.
   if (isPixelBlank(grid[row][col])) {
@@ -59,6 +71,11 @@ function updatePixel(row, col) {
   }
 }
 
+/**
+ * Updates a range of pixels on the canvas based on the current mouse position.
+ *
+ * @returns {void}
+ */
 function updateGrid() {
   for (let row = gridRows - 2; row >= 0; row--) {
     for (let col = 0; col < gridCols; col++) {
@@ -76,6 +93,11 @@ function updateGrid() {
   }
 }
 
+/**
+ * Draws the grid of pixels on the canvas.
+ *
+ * @returns {void}
+ */
 function drawGrid() {
   for (let row = 0; row < gridRows; row++) {
     for (let col = 0; col < gridCols; col++) {
@@ -90,6 +112,8 @@ function drawGrid() {
  * Updates and draws the grid.
  *
  * Uses `requestAnimationFrame()` to repeat on the next frame.
+ *
+ * @returns {void}
  */
 function drawAndUpdateGrid() {
   // If these are swapped, the pixel _below_ the mouse changes.
@@ -102,6 +126,9 @@ function drawAndUpdateGrid() {
 
 /**
  * Returns the mouse x and y coodinates on the canvas.
+ *
+ * @param {MouseEvent} event - The mouse event object.
+ * @returns {void}
  */
 function getMouseXY(event) {
   const canvas_rect = canvas.getBoundingClientRect();
@@ -115,6 +142,9 @@ function getMouseXY(event) {
  *
  * Enables dragging. Updates the pixels under the pointer each frame whilst the
  * mouse is depressed.
+ *
+ * @param {MouseEvent} event - The "mousedown" event object.
+ * @returns {void}
  */
 function handleMouseDown(event) {
   isDragging = true;
@@ -126,6 +156,8 @@ function handleMouseDown(event) {
    *
    * Uses `requestAnimationFrame()` instead of `setInterval()` for performance
    * reasons.
+   *
+   * @returns {void}
    */
   function dragLoop() {
     if (isDragging) {
@@ -141,6 +173,9 @@ function handleMouseDown(event) {
  * Handles "mousemove" event.
  *
  * Updates mouse coordinates.
+ *
+ * @param {MouseEvent} event - The "mousemove" event object.
+ * @returns {void}
  */
 function handleMouseMove(event) {
   [mouseX, mouseY] = getMouseXY(event);
@@ -150,6 +185,8 @@ function handleMouseMove(event) {
  * Handles "mouseup" event.
  *
  * Disables dragging.
+ *
+ * @returns {void}
  */
 function handleMouseUp() {
   isDragging = false;
