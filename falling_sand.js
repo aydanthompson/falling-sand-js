@@ -33,7 +33,7 @@ function isRowColInGrid(row, col) {
 }
 
 function isInCircle(row, col, gridRow, gridCol) {
-  return ((row - gridRow) ** 2 + (col - gridCol) ** 2 <= mouseRadius ** 2) ? true : false;
+  return (row - gridRow) ** 2 + (col - gridCol) ** 2 <= mouseRadius ** 2 ? true : false;
 }
 
 function updatePixelRange() {
