@@ -15,6 +15,8 @@ let isDragging = false;
 let mouseX, mouseY;
 const mouseRadius = 3;
 
+const randomHorizontalChance = 0.25;
+
 let grid = new Array(gridRows);
 for (let i = 0; i < gridRows; i++) {
   grid[i] = new Array(gridCols).fill(defaultColor);
@@ -77,20 +79,49 @@ function updatePixel(row, col) {
  * @returns {void}
  */
 function updateGrid() {
-  for (let row = gridRows - 2; row >= 0; row--) {
-    for (let col = 0; col < gridCols; col++) {
+  let newGrid = new Array(gridRows);
+  newGrid[newGrid.length - 1] = [...grid[grid.length - 1]];
+  for (let i = 0; i < gridRows - 1; i++) {
+    newGrid[i] = new Array(gridCols).fill(defaultColor);
+  }
+
+  // Iterate row-wise bottom-up (skipping bottom row).
+  // Iterate column-wise left to right.
+  for (let row = grid.length - 2; row >= 0; row--) {
+    // Downwards movement.
+    for (let col = 0; col < grid[row].length; col++) {
       if (!isPixelBlank(grid[row][col])) {
-        let leftOrRight = Math.random() < 0.5 ? -1 : 1;
         if (isPixelBlank(grid[row + 1][col])) {
-          grid[row + 1][col] = grid[row][col];
-          grid[row][col] = defaultColor;
-        } else if (isPixelBlank(grid[row + 1][col + leftOrRight])) {
-          grid[row + 1][col + leftOrRight] = grid[row][col];
+          newGrid[row + 1][col] = grid[row][col];
           grid[row][col] = defaultColor;
         }
       }
     }
+
+    // Downwards and left/right movement.
+    for (let col = 0; col < grid[row].length; col++) {
+      // There is a random chance to ignore this!
+      if (!isPixelBlank(grid[row][col]) && Math.random() < randomHorizontalChance) {
+        const leftOrRight = Math.random() < 0.5 ? -1 : 1;
+        if (isPixelBlank(grid[row + 1][col + leftOrRight])) {
+          newGrid[row + 1][col + leftOrRight] = grid[row][col];
+          grid[row][col] = defaultColor;
+        } else if (isPixelBlank(grid[row + 1][col - leftOrRight])) {
+          newGrid[row + 1][col - leftOrRight] = grid[row][col];
+          grid[row][col] = defaultColor;
+        }
+      }
+    }
+
+    // No movement.
+    for (let col = 0; col < grid[row].length; col++) {
+      if (!isPixelBlank(grid[row][col])) {
+        newGrid[row][col] = grid[row][col];
+      }
+    }
   }
+
+  grid = newGrid;
 }
 
 /**
