@@ -17,10 +17,16 @@ const mouseRadius = 3;
 
 const randomHorizontalChance = 0.25;
 
-function create2DArray() {
+/**
+ * Creates a 2D array filled with a specified value.
+ *
+ * @param {*} fillValue - The value to fill the array with.
+ * @returns {Array<Array<*>>} A 2D array filled with the specified value.
+ */
+function create2DArray(fillValue) {
   let arr = new Array(gridRows);
   for (let i = 0; i < gridRows; i++) {
-    arr[i] = new Array(gridCols).fill(defaultColor);
+    arr[i] = new Array(gridCols).fill(fillValue);
   }
   return arr
 }
@@ -82,18 +88,20 @@ function updatePixel(row, col) {
  * @returns {void}
  */
 function updateGrid() {
-  let newGrid = create2DArray()
+  let newGrid = create2DArray(defaultColor)
   newGrid[newGrid.length - 1] = [...grid[grid.length - 1]];
+  /** @type {Array<Array<boolean>>} - A boolean mask identifying which pixels have changed in the current iteration. */
+  let diffGrid = create2DArray(0)
 
   // Iterate row-wise bottom-up (skipping bottom row).
   // Iterate column-wise left to right.
   for (let row = grid.length - 2; row >= 0; row--) {
     // Downwards movement.
     for (let col = 0; col < grid[row].length; col++) {
-      if (!isPixelBlank(grid[row][col])) {
-        if (isPixelBlank(grid[row + 1][col])) {
+      if (!isPixelBlank(grid[row][col]) && diffGrid[row][col] === 0) {
+        if (isPixelBlank(newGrid[row + 1][col])) {
           newGrid[row + 1][col] = grid[row][col];
-          grid[row][col] = defaultColor;
+          diffGrid[row][col] = 1;
         }
       }
     }
@@ -101,22 +109,23 @@ function updateGrid() {
     // Downwards and left/right movement.
     for (let col = 0; col < grid[row].length; col++) {
       // There is a random chance to ignore this!
-      if (!isPixelBlank(grid[row][col]) && Math.random() < randomHorizontalChance) {
+      if (!isPixelBlank(grid[row][col]) && diffGrid[row][col] === 0 && Math.random() < randomHorizontalChance) {
         const leftOrRight = Math.random() < 0.5 ? -1 : 1;
-        if (isPixelBlank(grid[row + 1][col + leftOrRight])) {
+        if (isPixelBlank(newGrid[row + 1][col + leftOrRight])) {
           newGrid[row + 1][col + leftOrRight] = grid[row][col];
-          grid[row][col] = defaultColor;
-        } else if (isPixelBlank(grid[row + 1][col - leftOrRight])) {
+          diffGrid[row][col] = 1;
+        } else if (isPixelBlank(newGrid[row + 1][col - leftOrRight])) {
           newGrid[row + 1][col - leftOrRight] = grid[row][col];
-          grid[row][col] = defaultColor;
+          diffGrid[row][col] = 1;
         }
       }
     }
 
     // No movement.
     for (let col = 0; col < grid[row].length; col++) {
-      if (!isPixelBlank(grid[row][col])) {
+      if (!isPixelBlank(grid[row][col]) && diffGrid[row][col] === 0) {
         newGrid[row][col] = grid[row][col];
+        diffGrid[row][col] = 1;
       }
     }
   }
@@ -228,6 +237,6 @@ canvas.addEventListener("mousemove", handleMouseMove);
 canvas.addEventListener("mouseup", handleMouseUp);
 canvas.addEventListener("mouseleave", handleMouseUp);
 
-let grid = create2DArray()
+let grid = create2DArray(defaultColor)
 drawGrid();
 requestAnimationFrame(drawAndUpdateGrid);
