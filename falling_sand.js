@@ -17,9 +17,12 @@ const mouseRadius = 3;
 
 const randomHorizontalChance = 0.25;
 
-let grid = new Array(gridRows);
-for (let i = 0; i < gridRows; i++) {
-  grid[i] = new Array(gridCols).fill(defaultColor);
+function create2DArray() {
+  let arr = new Array(gridRows);
+  for (let i = 0; i < gridRows; i++) {
+    arr[i] = new Array(gridCols).fill(defaultColor);
+  }
+  return arr
 }
 
 function isPixelBlank(pixelColor) {
@@ -79,11 +82,8 @@ function updatePixel(row, col) {
  * @returns {void}
  */
 function updateGrid() {
-  let newGrid = new Array(gridRows);
+  let newGrid = create2DArray()
   newGrid[newGrid.length - 1] = [...grid[grid.length - 1]];
-  for (let i = 0; i < gridRows - 1; i++) {
-    newGrid[i] = new Array(gridCols).fill(defaultColor);
-  }
 
   // Iterate row-wise bottom-up (skipping bottom row).
   // Iterate column-wise left to right.
@@ -228,5 +228,6 @@ canvas.addEventListener("mousemove", handleMouseMove);
 canvas.addEventListener("mouseup", handleMouseUp);
 canvas.addEventListener("mouseleave", handleMouseUp);
 
+let grid = create2DArray()
 drawGrid();
 requestAnimationFrame(drawAndUpdateGrid);
