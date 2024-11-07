@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 
 const canvasWidth = canvas.width;
 const canvasHeight = canvas.height;
-const pixelSize = 8;
+const pixelSize = 4;
 
 const gridRows = Math.floor(canvasHeight / pixelSize);
 const gridCols = Math.floor(canvasWidth / pixelSize);
@@ -15,7 +15,8 @@ let isDragging = false;
 let mouseX, mouseY;
 const mouseRadius = 3;
 
-const randomHorizontalChance = 0.25;
+const randomHorizontalChance = 0.5;
+const randomVerticalChance = 0.9;
 
 /**
  * Creates a 2D array filled with a specified value.
@@ -28,7 +29,7 @@ function create2DArray(fillValue) {
   for (let i = 0; i < gridRows; i++) {
     arr[i] = new Array(gridCols).fill(fillValue);
   }
-  return arr
+  return arr;
 }
 
 function isPixelBlank(pixelColor) {
@@ -90,7 +91,7 @@ function updatePixel(row, col) {
 function updateGrid() {
   let newGrid = create2DArray(defaultColor)
   newGrid[newGrid.length - 1] = [...grid[grid.length - 1]];
-  /** @type {Array<Array<boolean>>} - A boolean mask identifying which pixels have changed in the current iteration. */
+  /** @type {Array<Array<number>>} - A boolean mask identifying which pixels have changed in the current iteration. */
   let diffGrid = create2DArray(0)
 
   // Iterate row-wise bottom-up (skipping bottom row).
@@ -98,7 +99,7 @@ function updateGrid() {
   for (let row = grid.length - 2; row >= 0; row--) {
     // Downwards movement.
     for (let col = 0; col < grid[row].length; col++) {
-      if (!isPixelBlank(grid[row][col]) && diffGrid[row][col] === 0) {
+      if (!isPixelBlank(grid[row][col]) && diffGrid[row][col] === 0  && Math.random() < randomVerticalChance) {
         if (isPixelBlank(newGrid[row + 1][col])) {
           newGrid[row + 1][col] = grid[row][col];
           diffGrid[row][col] = 1;
@@ -131,19 +132,24 @@ function updateGrid() {
   }
 
   grid = newGrid;
+  diffGrid[diffGrid.length - 1].fill(1);
+  return diffGrid;
 }
 
 /**
  * Draws the grid of pixels on the canvas.
  *
+ * @param {Array<Array<number>>} diffGrid - A boolean mask identifying which pixels have changed in the current iteration.
  * @returns {void}
  */
-function drawGrid() {
+function drawGrid(diffGrid) {
   for (let row = 0; row < gridRows; row++) {
     for (let col = 0; col < gridCols; col++) {
-      const currentColor = grid[row][col];
-      ctx.fillStyle = `hsl(${currentColor[0]}, ${currentColor[1]}%, ${currentColor[2]}%)`;
-      ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+      if (diffGrid[row][col] == 1) {
+        const currentColor = grid[row][col];
+        ctx.fillStyle = `hsl(${currentColor[0]}, ${currentColor[1]}%, ${currentColor[2]}%)`;
+        ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+      }
     }
   }
 }
@@ -156,11 +162,9 @@ function drawGrid() {
  * @returns {void}
  */
 function drawAndUpdateGrid() {
-  // If these are swapped, the pixel _below_ the mouse changes.
-  drawGrid();
-  updateGrid();
+  drawGrid(updateGrid());
   // Hue acts like it loops around at 360, hence continuous addition.
-  newColor[0] += 0.2;
+  newColor[0] += 1;
   requestAnimationFrame(drawAndUpdateGrid);
 }
 
@@ -238,5 +242,6 @@ canvas.addEventListener("mouseup", handleMouseUp);
 canvas.addEventListener("mouseleave", handleMouseUp);
 
 let grid = create2DArray(defaultColor)
-drawGrid();
+// Draw all pixels for first frame.
+drawGrid(create2DArray(1));
 requestAnimationFrame(drawAndUpdateGrid);
